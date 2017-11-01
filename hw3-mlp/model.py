@@ -8,8 +8,8 @@ epsilon = 1E-3
 class Model:
     def __init__(self,
                  is_train,
-                 learning_rate=0.01,
-                 learning_rate_decay_factor=1):
+                 learning_rate=0.001,
+                 learning_rate_decay_factor=0.9995):
         self.x_ = tf.placeholder(tf.float32, [None, 28*28])
         self.y_ = tf.placeholder(tf.int32, [None])
         self.keep_prob = tf.placeholder(tf.float32)
@@ -17,15 +17,15 @@ class Model:
         # TODO:  implement input -- Linear -- BN -- ReLU -- Linear -- loss
         #        the 10-class prediction output is named as "logits"
         # linear layer1
-        self.w1 = weight_variable([784, 81])
-        self.b1 = bias_variable([81])
+        self.w1 = weight_variable([784, 100])
+        self.b1 = bias_variable([100])
         x_l1 = tf.matmul(self.x_, self.w1) + self.b1
         x_bn = batch_normalization_layer(x_l1, is_train)
         # x_bn = x_l1
         x_l1_relu = tf.nn.relu(x_bn)
 
         # linear layer2
-        self.w2 = weight_variable([81, 10])
+        self.w2 = weight_variable([100, 10])
         self.b2 = bias_variable([10])
         logits = tf.matmul(x_l1_relu, self.w2) + self.b2
 
@@ -49,12 +49,12 @@ class Model:
 
 
 def weight_variable(shape):  # you can use this func to build new variables
-    initial = tf.truncated_normal(shape, stddev=0.01)
+    initial = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
 
 def bias_variable(shape):  # you can use this func to build new variables
-    initial = tf.constant(0.01, shape=shape)
+    initial = tf.constant(0.1, shape=shape)
     return tf.Variable(initial)
 
 
@@ -103,7 +103,9 @@ def batch_normalization_layer(inputs, isTrain=True):
             inputs_normalized = tf.divide(inputs - mean, tf.sqrt(var + epsilon))
             inputs_bn = tf.multiply(inputs_normalized, gamma) + beta
             return inputs_bn
+            # return tf.nn.batch_normalization(inputs, mean, var, beta, gamma, epsilon)
     else:
         inputs_normalized = tf.divide(inputs - train_mean, tf.sqrt(train_var + epsilon))
         inputs_bn = tf.multiply(inputs_normalized, gamma) + beta
         return inputs_bn
+        # return tf.nn.batch_normalization(inputs, train_mean, train_var, beta, gamma, epsilon)

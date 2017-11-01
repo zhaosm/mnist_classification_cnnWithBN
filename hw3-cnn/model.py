@@ -16,18 +16,21 @@ class Model:
 
         # TODO: implement input -- Conv -- BN -- ReLU -- MaxPool -- Conv -- BN -- ReLU -- MaxPool -- Linear -- loss
         conv1 = tf.layers.conv2d(inputs=x, filters=32, kernel_size=[5, 5], padding="same")
-        conv1_bn = batch_normalization_layer(conv1, is_train)
+        # conv1_bn = batch_normalization_layer(conv1, is_train)
+        conv1_bn = conv1
         conv1_bn_relu = tf.nn.relu(conv1_bn)
         pool1 = tf.layers.max_pooling2d(inputs=conv1_bn_relu, pool_size=[2, 2], strides=2)
 
         conv2 = tf.layers.conv2d(inputs=pool1, filters=64, kernel_size=[5, 5], padding="same")
-        conv2_bn = batch_normalization_layer(conv2, is_train)
+        conv2_bn = conv2
+        # conv2_bn = batch_normalization_layer(conv2, is_train)
         conv2_bn_relu = tf.nn.relu(conv2_bn)
         pool2 = tf.layers.max_pooling2d(inputs=conv2_bn_relu, pool_size=[2, 2], strides=2)
 
         linear = tf.reshape(pool2, [-1, 3136])
         w = weight_variable([3136, 10])
-        logits = tf.matmul(linear, w)
+        b = bias_variable([10])
+        logits = tf.matmul(linear, w) + b
         #        the 10-class prediction output is named as "logits"
         # logits = tf.Variable(tf.constant(0.0, shape=[100, 10]))  # deleted this line after you implement above layers
 
