@@ -6,14 +6,18 @@ import os
 import time
 from model import Model
 from load_data import load_mnist_2d
+import datetime
 
 tf.app.flags.DEFINE_integer("batch_size", 100, "batch size for training")
-tf.app.flags.DEFINE_integer("num_epochs", 20, "number of epochs")
+tf.app.flags.DEFINE_integer("num_epochs", 5, "number of epochs")
 tf.app.flags.DEFINE_float("keep_prob", 0.5, "drop out rate")
-tf.app.flags.DEFINE_boolean("is_train", True, "False to inference")
+tf.app.flags.DEFINE_boolean("is_train", False, "False to inference")
 tf.app.flags.DEFINE_string("data_dir", "./MNIST_data", "data dir")
 tf.app.flags.DEFINE_string("train_dir", "./train", "training dir")
 tf.app.flags.DEFINE_integer("inference_version", 0, "the version for inferencing")
+tf.app.flags.DEFINE_integer("disp_freq", 5, "Display frequency")
+tf.app.flags.DEFINE_string("loss_path", "./loss.txt", "Path to save loss")
+tf.app.flags.DEFINE_string("log_path", "./log.txt", "Path to save log info")
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -39,6 +43,8 @@ def shuffle(X, y, shuffle_parts):  # Shuffle the X and y
 def train_epoch(model, sess, X, y): # Training Process
     loss, acc = 0.0, 0.0
     st, ed, times = 0, FLAGS.batch_size, 0
+    loss_values = []
+    times_values = []
     while st < len(X) and ed <= len(X):
         X_batch, y_batch = X[st:ed], y[st:ed]
         feed = {model.x_: X_batch, model.y_: y_batch, model.keep_prob: FLAGS.keep_prob}
@@ -47,6 +53,12 @@ def train_epoch(model, sess, X, y): # Training Process
         acc += acc_
         st, ed = ed, ed+FLAGS.batch_size
         times += 1
+
+        if times % FLAGS.disp_freq == 0:
+            loss_values.append(loss_)
+            times_values.append(times)
+    with open(FLAGS.loss_path, "a") as f:
+        f.writelines([("%d %f\n" % (t, l)) for (t, l) in zip(times_values, loss_values)])
     loss /= times
     acc /= times
     return acc, loss
@@ -87,6 +99,11 @@ with tf.Session() as sess:
 
         pre_losses = [1e18] * 3
         best_val_acc = 0.0
+
+
+        start = datetime.datetime.now()
+
+
         for epoch in range(FLAGS.num_epochs):
             start_time = time.time()
             train_acc, train_loss = train_epoch(mlp_model, sess, X_train, y_train)  # Complete the training process
@@ -115,6 +132,10 @@ with tf.Session() as sess:
                 sess.run(mlp_model.learning_rate_decay_op)
             pre_losses = pre_losses[1:] + [train_loss]
 
+        end = datetime.datetime.now()
+        with open(FLAGS.log_path, "w") as f:
+            f.writelines("start time: %s, end time: %s\n" % (start.strftime('%b-%d-%y %H:%M:%S'), end.strftime('%b-%d-%y %H:%M:%S')))
+
     else:
         mlp_model = Model(False)
         if FLAGS.inference_version == 0:  # Load the checkpoint
@@ -131,3 +152,6 @@ with tf.Session() as sess:
             if result == y_test[i]:
                 count += 1
         print("test accuracy: {}".format(float(count) / len(X_test)))
+
+        with open(FLAGS.log_path, "a") as f:
+            f.write("Test accur: %s" % (float(count) / len(X_test)))
