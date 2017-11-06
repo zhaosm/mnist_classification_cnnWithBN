@@ -1,2 +1,0 @@
-start time: Nov-01-17 22:02:59, end time: Nov-01-17 22:04:26
-Test accur: 0.9772

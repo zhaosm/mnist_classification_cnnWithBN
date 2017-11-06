@@ -16,14 +16,14 @@ class Model:
 
         # TODO: implement input -- Conv -- BN -- ReLU -- MaxPool -- Conv -- BN -- ReLU -- MaxPool -- Linear -- loss
         conv1 = tf.layers.conv2d(inputs=x, filters=32, kernel_size=[5, 5], padding="same")
-        # conv1_bn = batch_normalization_layer(conv1, is_train)
-        conv1_bn = conv1
+        conv1_bn = batch_normalization_layer(conv1, is_train)
+        # conv1_bn = conv1
         conv1_bn_relu = tf.nn.relu(conv1_bn)
         pool1 = tf.layers.max_pooling2d(inputs=conv1_bn_relu, pool_size=[2, 2], strides=2)
 
         conv2 = tf.layers.conv2d(inputs=pool1, filters=64, kernel_size=[5, 5], padding="same")
-        conv2_bn = conv2
-        # conv2_bn = batch_normalization_layer(conv2, is_train)
+        # conv2_bn = conv2
+        conv2_bn = batch_normalization_layer(conv2, is_train)
         conv2_bn_relu = tf.nn.relu(conv2_bn)
         pool2 = tf.layers.max_pooling2d(inputs=conv2_bn_relu, pool_size=[2, 2], strides=2)
 
@@ -68,7 +68,7 @@ def batch_normalization_layer(inputs, isTrain=True):
     ema_factor = 0.999
     epsilon = 1E-3
 
-    gamma = tf.Variable(tf.ones([inputs.get_shape()[-1]]))
+    gamma = tf.Variable(tf.ones([inputs.get_shape()[-1]]))  # calculate probability distribution according to each channel
     beta = tf.Variable(tf.zeros([inputs.get_shape()[-1]]))
     train_mean = tf.Variable(tf.zeros([inputs.get_shape()[-1]]), trainable=False)
     train_var = tf.Variable(tf.ones([inputs.get_shape()[-1]]), trainable=False)

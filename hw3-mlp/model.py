@@ -58,33 +58,6 @@ def bias_variable(shape):  # you can use this func to build new variables
     return tf.Variable(initial)
 
 
-# def batch_normalization_layer(inputs, isTrain=True, isTest=False):  # for mlp
-#     # TODO: implemented the batch normalization func and applied it on fully-connected layers
-#     mean_sum = tf.Variable(tf.zeros([inputs.get_shape().as_list()[-1]]), trainable=False)
-#     var_sum = tf.Variable(tf.zeros([inputs.get_shape().as_list()[-1]]), trainable=False)
-#     iter_num = tf.Variable(initial_value=0.0, expected_shape=[], dtype=tf.float32, trainable=False)
-#     epsilon = 1E-3
-#     gamma = tf.Variable(initial_value=1.0)
-#     beta = tf.Variable(initial_value=0.0)
-#     if isTrain:
-#         mean, var = tf.nn.moments(inputs, axes=[0])
-#         inputs_normalized = tf.divide(tf.subtract(inputs, mean), tf.sqrt(var + epsilon))
-#         inputs_bn = tf.add(tf.multiply(inputs_normalized, gamma), beta)
-#         return inputs_bn, mean_sum, var_sum, iter_num
-#     elif not isTest:
-#         mean, var = tf.nn.moments(inputs, axes=[0])
-#         assigned_mean = tf.assign(mean_sum, tf.add(mean_sum, mean))
-#         assigned_var = tf.assign(var_sum, tf.add(var_sum, tf.divide(tf.multiply(var, 100), 99))) #  !!!!!!!!!!!!!TO DO
-#         train_iter = tf.assign(iter_num, tf.add(iter_num, 1.0))
-#         with tf.control_dependencies([assigned_mean, assigned_var, train_iter]):
-#             return inputs, mean_sum, var_sum, iter_num
-#     else:
-#         inputs_normalized = tf.divide(tf.subtract(inputs, tf.divide(mean_sum, iter_num)),
-#                                       tf.sqrt(tf.divide(var_sum, iter_num) + epsilon))
-#         inputs_bn = tf.add(tf.multiply(inputs_normalized, gamma), beta)
-#         return inputs_bn, mean_sum, var_sum, iter_num
-
-
 def batch_normalization_layer(inputs, isTrain=True):
     # TODO: implemented the batch normalization func and applied it on fully-connected layers
     ema_factor = 0.999
@@ -103,9 +76,7 @@ def batch_normalization_layer(inputs, isTrain=True):
             inputs_normalized = tf.divide(inputs - mean, tf.sqrt(var + epsilon))
             inputs_bn = tf.multiply(inputs_normalized, gamma) + beta
             return inputs_bn
-            # return tf.nn.batch_normalization(inputs, mean, var, beta, gamma, epsilon)
     else:
         inputs_normalized = tf.divide(inputs - train_mean, tf.sqrt(train_var + epsilon))
         inputs_bn = tf.multiply(inputs_normalized, gamma) + beta
         return inputs_bn
-        # return tf.nn.batch_normalization(inputs, train_mean, train_var, beta, gamma, epsilon)
